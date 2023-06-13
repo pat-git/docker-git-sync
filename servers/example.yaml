@@ -1,0 +1,19 @@
+server:
+  name: "patrick-pc-ubuntu"
+  description: "Your PC Hostname"
+  compose-command: "docker-compose"
+stacks:
+  example-hello-world:
+    workdir: "./example/"
+    compose: "docker-compose.yaml"
+    values: {}
+nginx:
+  config:
+    provisioning: "./nginx/nginx.conf"
+    target: "/etc/nginx/nginx.conf"
+    sites-enabled: "/etc/nginx/sites-enabled"
+  sites:
+    test:
+      name: "example.com"
+      file: "./nginx/example.com.conf"
+      values: {}
