@@ -1,6 +1,6 @@
 server:
-  name: "patrick-pc-ubuntu"
-  description: "Your PC Hostname"
+  name: "your-server-hostname"
+  description: "Your server Hostname description"
   compose-command: "docker-compose"
 stacks:
   example-hello-world:
