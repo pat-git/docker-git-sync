@@ -2,7 +2,7 @@ import argparse
 import os
 import shutil
 import socket
-from subprocess import check_output
+from subprocess import check_output, CalledProcessError
 
 import yaml
 
@@ -34,8 +34,8 @@ def update_docker_stacks(yaml_content, command):
             try:
                 result = check_output([command, "-f", compose_file, "up", "-d"], cwd=workdir)
                 print(result.decode("utf-8"))
-            except RuntimeError:
-                print(f"Runtime Error occurred while executing {command} -f {compose_file} up -d")
+            except (RuntimeError, CalledProcessError) as error:
+                print(f"Runtime Error occurred while executing {command} -f {compose_file} up -d:\n {error}")
 
 
 def link_nginx_configs(content):
@@ -52,9 +52,11 @@ def link_nginx_configs(content):
                 # Backup old file because in next step it would be overwritten.
                 if os.path.isfile(target):
                     shutil.move(target, target + ".bak")
+                    print(f"Moved {target} to {target}.bak (backup file).")
 
                 # Overwrite nginx config file.
                 shutil.copy(source, target)
+                print(f"Copied {source} to {target}.")
 
             if content.get("nginx").get("sites") is not None:
                 nginx_sites = content.get("nginx").get("sites")
@@ -65,7 +67,9 @@ def link_nginx_configs(content):
                     if os.path.realpath(link) != source:
                         if os.path.islink(link) or os.path.isfile(link):
                             os.remove(link)
+                            print(f"Deleted file/link: {link}")
                         os.symlink(source, link)
+                        print(f"Created link from {link} -> {source}.")
 
 
 def find_yaml_config(args):
@@ -100,9 +104,11 @@ def main():
                         help="enables nginx config linking/overwriting")
     parser.add_argument('-dd', '--disable-docker', action='store_true', default=False,
                         help="disable docker-compose to startup docker stacks")
+    parser.add_argument('-up', '--start-up', action='store_true', default=False,
+                        help="start the docker-compose anyways (without git change; useful for initial start)")
     parser.add_argument('-sd', '--server-directory', default="./servers", help="set path for server configurations.")
     args = parser.parse_args()
-    if fetch_from_git() and (not args.disable_docker or args.enable_nginx_config):
+    if fetch_from_git() and (not args.disable_docker or args.enable_nginx_config) or args.start_up:
         find_yaml_config(args)
 
 

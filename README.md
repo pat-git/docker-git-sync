@@ -54,7 +54,8 @@ To run every minute (and store output in sync.log):
 * * * * * python3 /home/user/repo/docker-git-sync.py >> /home/user/sync.log
 ```
 
-Keep in mind to also sync nginx config (+sites) with a different user (root privileges):
+You can also sync nginx config (+sites) with a different user (root privileges):
 ```cron
 * * * * * python3 /home/user/repo/docker-git-sync.py -nc -dd >> /home/user/sync-nginx.log
 ```
+**Keep in mind that this will be run as root user and may be insecure and dangerous to use. Use this at your own risk**.
