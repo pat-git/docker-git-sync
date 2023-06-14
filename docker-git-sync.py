@@ -102,7 +102,7 @@ def main():
                         help="disable docker-compose to startup docker stacks")
     parser.add_argument('-sd', '--server-directory', default="./servers", help="set path for server configurations.")
     args = parser.parse_args()
-    if fetch_from_git() or True:
+    if fetch_from_git() and (not args.disable_docker or args.enable_nginx_config):
         find_yaml_config(args)
 
 
