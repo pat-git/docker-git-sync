@@ -34,7 +34,7 @@ sudo python3 docker-git-sync.py -up -nc -dd
 The ``-up`` parameter will simply skip the git check and execute the commands to sync the docker containers and the nginx config.
 
 ## Server configuration
-For each configuration you have to specify a configuration yaml file.
+For each server (hostname) you have to specify a configuration yaml file.
 
 Example configuration:
 ```yaml
