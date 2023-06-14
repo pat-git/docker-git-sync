@@ -1,5 +1,4 @@
 import argparse
-import errno
 import os
 import shutil
 import socket

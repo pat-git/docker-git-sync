@@ -6,7 +6,6 @@ stacks:
   example-hello-world:
     workdir: "./example/"
     compose: "docker-compose.yaml"
-    values: {}
 nginx:
   config:
     provisioning: "./nginx/nginx.conf"
@@ -16,4 +15,3 @@ nginx:
     test:
       name: "example.com"
       file: "./nginx/sites/example.com.conf"
-      values: {}
