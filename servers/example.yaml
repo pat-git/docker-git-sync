@@ -11,9 +11,9 @@ nginx:
   config:
     provisioning: "./nginx/nginx.conf"
     target: "/etc/nginx/nginx.conf"
-    sites-enabled: "/etc/nginx/sites-enabled"
+    sites-enabled: "/etc/nginx/sites-enabled/"
   sites:
     test:
       name: "example.com"
-      file: "./nginx/example.com.conf"
+      file: "./nginx/sites/example.com.conf"
       values: {}
