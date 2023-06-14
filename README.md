@@ -20,7 +20,20 @@ sudo python3 docker-git-sync.py -nc -dd
 You have to have root/sudo privileges because the nginx config is stored in ``/etc/nginx``.
 It is recommended to not start the containers as root, therefore disable the docker-compose command execution using parameter ``-dd``.
 
-## server configuration
+### Initial startup
+You can also start your stacks without any git change (for example on initial server setup or on testing purposes).
+To do this just enter the following command:
+
+```sh
+# Execute script with default parameters + initial startup.
+python3 docker-git-sync.py -up
+
+# Execute with nginx-config sync enabled and docker-compose disabled + initial startup.
+sudo python3 docker-git-sync.py -up -nc -dd
+```
+The ``-up`` parameter will simply skip the git check and execute the commands to sync the docker containers and the nginx config.
+
+## Server configuration
 For each configuration you have to specify a configuration yaml file.
 
 Example configuration:
@@ -46,7 +59,7 @@ nginx:
 It is important to set the hostname of your server in the "name" argument.
 All servers which use the docker-git-sync script and have this specific hostname will start the specified docker stacks and sync the nginx config.
 
-## cron jobs
+## Cron jobs
 You can also set up cron jobs to automatically start the sync script.
 
 To run every minute (and store output in sync.log): 
