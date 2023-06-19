@@ -64,11 +64,11 @@ You can also set up cron jobs to automatically start the sync script.
 
 To run every minute (and store output in sync.log): 
 ```cron
-* * * * * python3 /home/user/repo/docker-git-sync.py >> /home/user/sync.log
+* * * * * cd /home/user/repo/ && python3 docker-git-sync.py >> /home/user/git-sync.log 2>&1
 ```
 
 You can also sync nginx config (+sites) with a different user (root privileges):
 ```cron
-* * * * * python3 /home/user/repo/docker-git-sync.py -nc -dd >> /home/user/sync-nginx.log
+* * * * * cd /home/user/repo/ && python3 docker-git-sync.py -nc -dd >> /home/user/git-sync.log 2>&1
 ```
 **Keep in mind that this will be run as root user and may be insecure and dangerous to use. Use this at your own risk**.

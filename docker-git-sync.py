@@ -5,18 +5,19 @@ import socket
 from subprocess import check_output, CalledProcessError
 
 import yaml
+import logging
 
 
 def fetch_from_git():
     synced = False
     head_sha = check_output(["git", "rev-parse", "HEAD"])
     current_sha = check_output(["git", "rev-parse", "@{u}"])
-    print(f"HEAD SHA: {head_sha}, current SHA: {current_sha}")
+    logging.info(f"HEAD SHA: {head_sha}, current SHA: {current_sha}")
 
     if head_sha != current_sha:
         branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
         result = check_output(["git", "pull", "origin", f"{branch}"])
-        print(result.decode("utf-8"))
+        logging.info(result.decode("utf-8"))
         synced = True
     return synced
 
@@ -33,9 +34,9 @@ def update_docker_stacks(yaml_content, command):
         if workdir is not None:
             try:
                 result = check_output([command, "-f", compose_file, "up", "-d"], cwd=workdir)
-                print(result.decode("utf-8"))
+                logging.info(result.decode("utf-8"))
             except (RuntimeError, CalledProcessError) as error:
-                print(f"Runtime Error occurred while executing {command} -f {compose_file} up -d:\n {error}")
+                logging.error(f"Runtime Error occurred while executing {command} -f {compose_file} up -d:\n {error}")
 
 
 def link_nginx_configs(content):
@@ -52,11 +53,11 @@ def link_nginx_configs(content):
                 # Backup old file because in next step it would be overwritten.
                 if os.path.isfile(target):
                     shutil.move(target, target + ".bak")
-                    print(f"Moved {target} to {target}.bak (backup file).")
+                    logging.info(f"Moved {target} to {target}.bak (backup file).")
 
                 # Overwrite nginx config file.
                 shutil.copy(source, target)
-                print(f"Copied {source} to {target}.")
+                logging.info(f"Copied {source} to {target}.")
 
             if content.get("nginx").get("sites") is not None:
                 nginx_sites = content.get("nginx").get("sites")
@@ -67,9 +68,9 @@ def link_nginx_configs(content):
                     if os.path.realpath(link) != source:
                         if os.path.islink(link) or os.path.isfile(link):
                             os.remove(link)
-                            print(f"Deleted file/link: {link}")
+                            logging.info(f"Deleted file/link: {link}")
                         os.symlink(source, link)
-                        print(f"Created link from {link} -> {source}.")
+                        logging.info(f"Created link from {link} -> {source}.")
 
 
 def find_yaml_config(args):
@@ -97,6 +98,7 @@ def walk_through_files(path, file_extensions='.yaml,.yml'):
 
 
 def main():
+    logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
     parser = argparse.ArgumentParser(
         prog='docker-git-sync.py',
         description='Sync docker stacks with git repository.')
