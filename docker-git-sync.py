@@ -10,13 +10,16 @@ import logging
 
 def fetch_from_git():
     synced = False
+    result = check_output(["git", "fetch", "origin"])
+    logging.info(f"Running git-sync, fetch result: {result.decode('utf-8')}")
     head_sha = check_output(["git", "rev-parse", "HEAD"])
     current_sha = check_output(["git", "rev-parse", "@{u}"])
     logging.info(f"HEAD SHA: {head_sha}, current SHA: {current_sha}")
 
     if head_sha != current_sha:
-        branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
-        result = check_output(["git", "pull", "origin", f"{branch}"])
+        branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").replace("\n","")
+        check_output(["git", "stash"])
+        result = check_output(["git", "pull", "--rebase", "origin", f"{branch}"])
         logging.info(result.decode("utf-8"))
         synced = True
     return synced
@@ -98,7 +101,7 @@ def walk_through_files(path, file_extensions='.yaml,.yml'):
 
 
 def main():
-    logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S')
+    logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
     parser = argparse.ArgumentParser(
         prog='docker-git-sync.py',
         description='Sync docker stacks with git repository.')
