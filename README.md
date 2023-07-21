@@ -39,13 +39,19 @@ For each server (hostname) you have to specify a configuration yaml file.
 Example configuration:
 ```yaml
 server:
-  name: "<your-server-hostname>"
+  name: "your-server-hostname"
   description: "Your server Hostname description"
-  compose-command: "docker-compose"
+  compose-command: "docker compose"
 stacks:
   example-hello-world:
-    workdir: "./example/"
+    workdir: "./example/hello-world/"
     compose: "docker-compose.yaml"
+    values: {}
+  example-ubuntu:
+    workdir: "./example/ubuntu"
+    compose: "docker-compose.yaml"
+    values:
+      IMAGE_TAG: "22.04"
 nginx:
   config:
     provisioning: "./nginx/nginx.conf"
@@ -59,6 +65,9 @@ nginx:
 It is important to set the hostname of your server in the "name" argument.
 All servers which use the docker-git-sync script and have this specific hostname will start the specified docker stacks and sync the nginx config.
 
+You can also set env variables for the process the docker compose command gets executed.
+Just add them as key-value pairs in the "values" parameter of your stack.
+The env variable can then be accessed in the docker-compose.yaml using ``${YOUR_VARIABLE_NAME}``.
 ## Cron jobs
 You can also set up cron jobs to automatically start the sync script.
 
