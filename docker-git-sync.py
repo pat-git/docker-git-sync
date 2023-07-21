@@ -18,7 +18,6 @@ def fetch_from_git():
 
     if head_sha != current_sha:
         branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").replace("\n","")
-        check_output(["git", "stash"])
         result = check_output(["git", "pull", "--rebase", "origin", f"{branch}"])
         logging.info(result.decode("utf-8"))
         synced = True
@@ -27,7 +26,7 @@ def fetch_from_git():
 
 def update_docker_stacks(yaml_content, command):
     if command is None or command == "":
-        command = "docker-compose"
+        command = "docker compose"
     for stack_name in yaml_content.get("stacks"):
         stack = yaml_content.get("stacks").get(stack_name)
         workdir = stack.get("workdir")
@@ -36,10 +35,14 @@ def update_docker_stacks(yaml_content, command):
             compose_file = "docker-compose.yaml"
         if workdir is not None:
             try:
-                result = check_output([command, "-f", compose_file, "up", "-d"], cwd=workdir)
-                logging.info(result.decode("utf-8"))
+                env = stack.get("values")
+                program = command.split(" ") + ["-f", compose_file, "up", "-d"]
+                logging.info(f"Executing {program} with env: {env}")
+                result = check_output(program, cwd=workdir, env=env).decode("utf-8").strip()
+                if result != "":
+                    logging.info(result)
             except (RuntimeError, CalledProcessError) as error:
-                logging.error(f"Runtime Error occurred while executing {command} -f {compose_file} up -d:\n {error}")
+                logging.error(f"Runtime Error occurred while executing:\n {error}")
 
 
 def link_nginx_configs(content):
