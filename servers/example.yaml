@@ -1,11 +1,17 @@
 server:
   name: "your-server-hostname"
   description: "Your server Hostname description"
-  compose-command: "docker-compose"
+  compose-command: "docker compose"
 stacks:
   example-hello-world:
-    workdir: "./example/"
+    workdir: "./example/hello-world/"
     compose: "docker-compose.yaml"
+    values: {}
+  example-ubuntu:
+    workdir: "./example/ubuntu"
+    compose: "docker-compose.yaml"
+    values:
+      IMAGE_TAG: "22.04"
 nginx:
   config:
     provisioning: "./nginx/nginx.conf"
