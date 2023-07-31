@@ -42,6 +42,7 @@ server:
   name: "your-server-hostname"
   description: "Your server Hostname description"
   compose-command: "docker compose"
+  post-check-commands: []
 stacks:
   example-hello-world:
     workdir: "./example/hello-world/"

@@ -17,7 +17,7 @@ def fetch_from_git():
     logging.info(f"HEAD SHA: {head_sha}, current SHA: {current_sha}")
 
     if head_sha != current_sha:
-        branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").replace("\n","")
+        branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").replace("\n", "")
         result = check_output(["git", "pull", "--rebase", "origin", f"{branch}"])
         logging.info(result.decode("utf-8"))
         synced = True
@@ -79,6 +79,14 @@ def link_nginx_configs(content):
                         logging.info(f"Created link from {link} -> {source}.")
 
 
+def execute_post_commands(post_commands):
+    for command in post_commands:
+        logging.info(f"Executing {command}")
+        result = check_output(command.split(" ")).decode("utf-8").strip()
+        if result != "":
+            logging.info(result)
+
+
 def find_yaml_config(args):
     # For loop to search for yaml file in servers.
     for file in walk_through_files(path=args.server_directory):
@@ -87,12 +95,15 @@ def find_yaml_config(args):
         if content is not None and content.get("server") is not None and content.get("server").get("name") is not None:
             name = content.get("server").get("name")
             command = content.get("server").get("compose-command")
+            post_commands = content.get("server").get("post-check-commands")
             # If found, get through all stacks and do cd workdir and docker-compose up commands.
             if name == socket.gethostname():
                 if not args.disable_docker:
                     update_docker_stacks(content, command)
                 if args.enable_nginx_config:
                     link_nginx_configs(content)
+                if post_commands is not None and len(post_commands) > 0:
+                    execute_post_commands(post_commands)
 
 
 def walk_through_files(path, file_extensions='.yaml,.yml'):
