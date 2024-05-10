@@ -1,11 +1,11 @@
 import argparse
+import logging
 import os
 import shutil
 import socket
-from subprocess import check_output, CalledProcessError
+from subprocess import CalledProcessError, check_output
 
 import yaml
-import logging
 
 
 def fetch_from_git():
@@ -17,7 +17,11 @@ def fetch_from_git():
     logging.info(f"HEAD SHA: {head_sha}, current SHA: {current_sha}")
 
     if head_sha != current_sha:
-        branch = check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"]).decode("utf-8").replace("\n", "")
+        branch = (
+            check_output(["git", "rev-parse", "--abbrev-ref", "HEAD"])
+            .decode("utf-8")
+            .replace("\n", "")
+        )
         result = check_output(["git", "pull", "--rebase", "origin", f"{branch}"])
         logging.info(result.decode("utf-8"))
         synced = True
@@ -38,7 +42,9 @@ def update_docker_stacks(yaml_content, command):
                 env = stack.get("values")
                 program = command.split(" ") + ["-f", compose_file, "up", "-d"]
                 logging.info(f"Executing {program} with env: {env}")
-                result = check_output(program, cwd=workdir, env=env).decode("utf-8").strip()
+                result = (
+                    check_output(program, cwd=workdir, env=env).decode("utf-8").strip()
+                )
                 if result != "":
                     logging.info(result)
             except (RuntimeError, CalledProcessError) as error:
@@ -92,7 +98,11 @@ def find_yaml_config(args):
     for file in walk_through_files(path=args.server_directory):
         content = yaml.safe_load(open(file))
         # Then find any file with server.name = hostname.
-        if content is not None and content.get("server") is not None and content.get("server").get("name") is not None:
+        if (
+            content is not None
+            and content.get("server") is not None
+            and content.get("server").get("name") is not None
+        ):
             name = content.get("server").get("name")
             command = content.get("server").get("compose-command")
             post_commands = content.get("server").get("post-check-commands")
@@ -106,8 +116,8 @@ def find_yaml_config(args):
                     execute_post_commands(post_commands)
 
 
-def walk_through_files(path, file_extensions='.yaml,.yml'):
-    for (dir_path, dir_names, filenames) in os.walk(path):
+def walk_through_files(path, file_extensions=".yaml,.yml"):
+    for dir_path, dir_names, filenames in os.walk(path):
         for filename in filenames:
             for extension in file_extensions.split(","):
                 if filename.endswith(extension):
@@ -115,19 +125,47 @@ def walk_through_files(path, file_extensions='.yaml,.yml'):
 
 
 def main():
-    logging.basicConfig(format='%(asctime)s - %(message)s', datefmt='%d-%b-%y %H:%M:%S', level=logging.INFO)
+    logging.basicConfig(
+        format="%(asctime)s - %(message)s",
+        datefmt="%d-%b-%y %H:%M:%S",
+        level=logging.INFO,
+    )
     parser = argparse.ArgumentParser(
-        prog='docker-git-sync.py',
-        description='Sync docker stacks with git repository.')
-    parser.add_argument('-nc', '--enable-nginx-config', action='store_true', default=False,
-                        help="enables nginx config linking/overwriting")
-    parser.add_argument('-dd', '--disable-docker', action='store_true', default=False,
-                        help="disable docker-compose to startup docker stacks")
-    parser.add_argument('-up', '--start-up', action='store_true', default=False,
-                        help="start the docker-compose anyways (without git change; useful for initial start)")
-    parser.add_argument('-sd', '--server-directory', default="./servers", help="set path for server configurations.")
+        prog="docker-git-sync.py", description="Sync docker stacks with git repository."
+    )
+    parser.add_argument(
+        "-nc",
+        "--enable-nginx-config",
+        action="store_true",
+        default=False,
+        help="enables nginx config linking/overwriting",
+    )
+    parser.add_argument(
+        "-dd",
+        "--disable-docker",
+        action="store_true",
+        default=False,
+        help="disable docker-compose to startup docker stacks",
+    )
+    parser.add_argument(
+        "-up",
+        "--start-up",
+        action="store_true",
+        default=False,
+        help="start the docker-compose anyways (without git change; useful for initial start)",
+    )
+    parser.add_argument(
+        "-sd",
+        "--server-directory",
+        default="./servers",
+        help="set path for server configurations.",
+    )
     args = parser.parse_args()
-    if fetch_from_git() and (not args.disable_docker or args.enable_nginx_config) or args.start_up:
+    if (
+        fetch_from_git()
+        and (not args.disable_docker or args.enable_nginx_config)
+        or args.start_up
+    ):
         find_yaml_config(args)
 
 
