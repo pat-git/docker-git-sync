@@ -99,7 +99,7 @@ def execute_post_commands(post_commands: list[str]) -> None:
 def find_yaml_config(args) -> None:
     # For loop to search for yaml file in servers.
     server_directory = Path(args.server_directory)
-    for file in server_directory.rglob("*.yaml") + server_directory.rglob("*.yml"):
+    for file in server_directory.rglob("*.y*ml"):
         content = yaml.safe_load(file.open())
         # Then find any file with server.name = hostname.
         if (
